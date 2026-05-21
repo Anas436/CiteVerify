@@ -214,8 +214,8 @@ citeverify/
 ### 1. Clone and enter the project
 
 ```bash
-git clone https://github.com/yourusername/citeverify.git
-cd citeverify
+git clone https://github.com/Anas436/CiteVerify.git
+cd CiteVerify
 ```
 
 ### 2. Create and activate a virtual environment
