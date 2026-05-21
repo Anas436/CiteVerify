@@ -330,6 +330,3 @@ All configuration is via environment variables in `.env`:
 
 ---
 
-## License
-
-[MIT](LICENSE)
