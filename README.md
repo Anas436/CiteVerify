@@ -6,6 +6,16 @@ CiteVerify is a Django web application that uses a **5-agent AI pipeline** power
 
 ---
 
+## ▶️ Project Demo
+
+<p align="center">
+  <a href="https://drive.google.com/file/d/1cAGrHWYwbdMulHdjbvygnSonyKJlcJVD/view?usp=sharing">
+    <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg" width="400">
+    <br>
+    <img src="https://img.shields.io/badge/Video-Play_Demo-red?style=for-the-badge&logo=youtube&logoColor=white">
+  </a>
+</p>
+
 ## Features
 
 - **Multi-Agent Pipeline** — 5 specialized AI agents work sequentially: Citation Extractor → Context Analyzer → Source Verifier → Hallucination Detector → Report Generator
