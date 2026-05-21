@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}New Analysis — CiteVerify{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold">New Citation Analysis</h1>
+        <p class="text-gray-500 mt-1">Upload PDFs, Word documents or paste text to detect hallucinated citations.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <!-- Input Type Tabs -->
+        <div class="border-b border-gray-100" x-data="{ tab: 'text', fileName: '' }">
+            <div class="flex">
+                <button @click="tab = 'text'" :class="tab === 'text' ? 'border-primary-500 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <span>Paste Text</span>
+                    </div>
+                </button>
+                <button @click="tab = 'file'" :class="tab === 'file' ? 'border-primary-500 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        <span>Upload File</span>
+                    </div>
+                </button>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+
+                <!-- Text Input -->
+                <div x-show="tab === 'text'">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Paper title <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" name="title" placeholder="e.g., 'Analysis of Deep Learning Methods...'" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Research paper text</label>
+                        <textarea name="input_text" rows="12" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 font-mono text-sm" placeholder="Paste the full text of the research paper here including all citations...&#10;&#10;Example:&#10;Recent studies have shown significant improvements in neural network performance (Smith et al., 2023; Johnson &amp; Lee, 2022).&#10;The transformer architecture [1] has revolutionized NLP tasks.&#10;According to Brown et al. (2020), large language models exhibit..."></textarea>
+                        <p class="text-xs text-gray-400 mt-2">The text will be analyzed by our multi-agent AI system. For best results, include the full paper text with references.</p>
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div x-show="tab === 'file'" x-cloak>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Paper title <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" name="title" placeholder="e.g., 'Analysis of Deep Learning Methods...'" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Upload PDF or Word document</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-primary-400 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
+                            <div class="space-y-2 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-medium text-primary-600 hover:text-primary-500">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-gray-500">PDF or DOCX up to 10MB</p>
+                                <p class="text-xs text-gray-400" x-show="!fileName">No file selected</p>
+                                <p class="text-xs font-medium text-primary-600" x-show="fileName" x-text="'Selected: ' + fileName"></p>
+                            </div>
+                        </div>
+                        <input type="file" name="input_file" accept=".pdf,.docx" x-ref="fileInput" class="sr-only" @change="fileName = $refs.fileInput.files[0]?.name || ''; tab = 'file'">
+                        <p class="text-xs text-gray-400 mt-2">Upload a research paper and we'll extract the text for citation analysis.</p>
+                    </div>
+                </div>
+
+
+                <div class="mt-6 flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-purple-50 rounded-xl border border-primary-100">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-sm text-gray-600">Our multi-agent system will analyze every citation. Results appear in ~1-2 minutes.</p>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Analyze Citations
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-8 grid md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+            <div class="flex items-center space-x-2 mb-2">
+                <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-sm font-medium">Pro Tip</span>
+            </div>
+            <p class="text-xs text-gray-500">Include the references/bibliography section for more accurate verification.</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+            <div class="flex items-center space-x-2 mb-2">
+                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-sm font-medium">Supported</span>
+            </div>
+            <p class="text-xs text-gray-500">APA, MLA, IEEE, ACM, Chicago, and other major citation styles.</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+            <div class="flex items-center space-x-2 mb-2">
+                <svg class="w-4 h-4 text-citrine-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-sm font-medium">Limits</span>
+            </div>
+            <p class="text-xs text-gray-500">Max 60 citations analyzed per paper for optimal performance.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Analyzing...';
+        });
+    });
+</script>
+{% endblock %}

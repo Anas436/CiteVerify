@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Hero -->
+<section class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-primary-50/30 to-purple-50/30">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700 border border-primary-200 mb-8 animate-fade-in">
+                <span class="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse"></span>
+                Multi-Agent AI Citation Verification System
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6">
+                Detect Hallucinated<br>
+                <span class="gradient-text">Citations in Seconds</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+                A multi-agent AI system that analyzes research papers to identify fabricated or inaccurate citations.
+                Upload a PDF, Word document, or paste text — get a comprehensive forensic report.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-200 transform hover:-translate-y-0.5">
+                        Start New Analysis
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="{% url 'detector:dashboard' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-300 hover:text-primary-600 shadow-lg transition-all duration-200">
+                        View Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:signup' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-200 transform hover:-translate-y-0.5">
+                        Get Started Free
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-300 hover:text-primary-600 shadow-lg transition-all duration-200">
+                        Sign In
+                    </a>
+                {% endif %}
+            </div>
+            <div class="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
+                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>No credit card</span>
+                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Free tier available</span>
+                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Open-source AI</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4">How It Works</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Four specialized AI agents work together to analyze every citation in your paper.</p>
+        </div>
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center card-hover p-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/10">
+                    <span class="text-2xl font-bold text-primary-600">1</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Citation Extractor</h3>
+                <p class="text-sm text-gray-500">Extracts all citations using regex pattern matching and LLM analysis</p>
+            </div>
+            <div class="text-center card-hover p-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/10">
+                    <span class="text-2xl font-bold text-purple-600">2</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Context Analyzer</h3>
+                <p class="text-sm text-gray-500">Understands what claim each citation is supposed to support</p>
+            </div>
+            <div class="text-center card-hover p-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div class="w-16 h-16 bg-gradient-to-br from-citrine-100 to-citrine-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-citrine-500/10">
+                    <span class="text-2xl font-bold text-citrine-600">3</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Source Verifier</h3>
+                <p class="text-sm text-gray-500">Checks if cited sources plausibly exist and support the claims</p>
+            </div>
+            <div class="text-center card-hover p-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/10">
+                    <span class="text-2xl font-bold text-red-600">4</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Hallucination Detector</h3>
+                <p class="text-sm text-gray-500">Cross-references all evidence to flag fabricated citations</p>
+            </div>
+        </div>
+        <div class="text-center mt-12">
+            <div class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-primary-50 to-purple-50 border border-primary-100">
+                <svg class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span class="text-sm font-medium text-gray-700">Powered by <span class="text-primary-600">Groq</span> — ultra-fast LPU inference with LLaMA 3.3 70B</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4">Why CiteVerify?</h2>
+            <p class="text-lg text-gray-600">Built for researchers, by researchers. Here's what makes it different.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="card-hover p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-3">Multi-Agent Architecture</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Four specialized AI agents work in a pipeline — extraction, context analysis, source verification, and hallucination detection — for thorough forensic analysis.</p>
+            </div>
+            <div class="card-hover p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-3">Multiple Input Formats</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Upload PDFs, Word documents, or paste text directly. We extract and process the content automatically for analysis.</p>
+            </div>
+            <div class="card-hover p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-12 h-12 bg-gradient-to-br from-citrine-100 to-citrine-200 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-citrine-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+                <h3 class="font-semibold text-lg mb-3">Comprehensive Reports</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Get detailed citation-by-citation analysis with confidence scores, severity ratings, and actionable recommendations.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-purple-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to verify your paper?</h2>
+        <p class="text-lg text-primary-200 mb-8">Join researchers using AI to ensure citation integrity.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-primary-900 bg-white rounded-xl hover:bg-primary-50 shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5">
+                Analyze a Paper
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+        {% else %}
+            <a href="{% url 'accounts:signup' %}" class="inline-flex items-center px-8 py-4 text-base font-semibold text-primary-900 bg-white rounded-xl hover:bg-primary-50 shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5">
+                Start Free
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

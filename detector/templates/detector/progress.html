@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Analysis Progress — CiteVerify{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-8" id="progress-root" x-data="{ status: '{{ analysis.status }}', progress: {{ analysis.progress }}, error: '{{ analysis.error_message|escapejs }}' }">
+        <div class="w-20 h-20 bg-gradient-to-br from-primary-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            {% if analysis.status == 'completed' %}
+                <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {% elif analysis.status == 'failed' %}
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {% else %}
+                <svg class="w-10 h-10 text-primary-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            {% endif %}
+        </div>
+
+        <h1 class="text-2xl font-bold mb-2" x-text="status === 'completed' ? 'Analysis Complete!' : status === 'failed' ? 'Analysis Failed' : 'Analyzing Your Paper...'">
+            {% if analysis.status == 'completed' %}Analysis Complete!
+            {% elif analysis.status == 'failed' %}Analysis Failed
+            {% else %}Analyzing Your Paper...{% endif %}
+        </h1>
+        <p class="text-gray-500 mb-6" x-text="status === 'completed' ? 'Redirecting to results...' : status === 'failed' ? error || 'An error occurred during analysis.' : 'Our multi-agent system is processing each citation.'">
+            {% if analysis.status == 'completed' %}Redirecting to results...
+            {% elif analysis.status == 'failed' %}{{ analysis.error_message|default:'An error occurred during analysis.' }}
+            {% else %}Our multi-agent system is processing each citation.{% endif %}
+        </p>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-100 rounded-full h-3 mb-8 overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
+                 :style="'width: ' + progress + '%'"
+                 style="width: {{ analysis.progress }}%">
+            </div>
+        </div>
+
+        <!-- Agent Pipeline Status -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-left">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Agent Pipeline Status</h3>
+            <div id="agent-logs" class="space-y-1">
+                {% if analysis.status == 'completed' %}
+                    <div class="flex items-center space-x-3 py-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-sm text-gray-600">All agents completed analysis</span>
+                    </div>
+                {% elif analysis.status == 'failed' %}
+                    <div class="flex items-center space-x-3 py-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span class="text-sm text-red-600">Analysis failed</span>
+                    </div>
+                {% else %}
+                    <div class="flex items-center space-x-3 py-2" data-agent="Citation Extractor">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-500">Citation Extractor</span>
+                        <span class="agent-action text-xs text-gray-400 ml-2"></span>
+                    </div>
+                    <div class="flex items-center space-x-3 py-2" data-agent="Context Analyzer">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-500">Context Analyzer</span>
+                        <span class="agent-action text-xs text-gray-400 ml-2"></span>
+                    </div>
+                    <div class="flex items-center space-x-3 py-2" data-agent="Source Verifier">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-500">Source Verifier</span>
+                        <span class="agent-action text-xs text-gray-400 ml-2"></span>
+                    </div>
+                    <div class="flex items-center space-x-3 py-2" data-agent="Hallucination Detector">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-500">Hallucination Detector</span>
+                        <span class="agent-action text-xs text-gray-400 ml-2"></span>
+                    </div>
+                    <div class="flex items-center space-x-3 py-2" data-agent="Report Generator">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-500">Report Generator</span>
+                        <span class="agent-action text-xs text-gray-400 ml-2"></span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if analysis.status == 'failed' %}
+            <div class="mt-6">
+                <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg transition-all duration-200">
+                    Try Again
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+(function() {
+    var s = '{{ analysis.status }}';
+    if (s === 'completed' || s === 'failed') return;
+    var url = '{% url 'detector:analysis_status_api' analysis.id %}';
+    var resultsUrl = '{% url 'detector:analysis_results' analysis.id %}';
+    var poll = function() {
+        var r = new XMLHttpRequest();
+        r.open('GET', url);
+        r.onload = function() {
+            var d = JSON.parse(r.responseText);
+            var root = document.getElementById('progress-root');
+            if (root && window.Alpine) {
+                Alpine.$data(root).status = d.status;
+                Alpine.$data(root).progress = d.progress;
+                if (d.error_message) Alpine.$data(root).error = d.error_message;
+            }
+            if (d.logs) {
+                d.logs.forEach(function(l) {
+                    var row = document.querySelector('[data-agent="' + l.agent_name + '"]');
+                    if (row) {
+                        var dot = row.firstElementChild;
+                        if (dot) dot.className = 'w-2 h-2 rounded-full ' + (l.status === 'completed' ? 'bg-emerald-500' : l.status === 'failed' ? 'bg-red-500' : 'bg-primary-500 animate-pulse');
+                        var actionSpan = row.querySelector('.agent-action');
+                        if (actionSpan) {
+                            if (l.status === 'completed') {
+                                actionSpan.textContent = '✓ completed';
+                                actionSpan.className = 'agent-action text-xs text-emerald-500 ml-2 font-medium';
+                            } else if (l.status === 'running') {
+                                actionSpan.textContent = l.action || 'running...';
+                                actionSpan.className = 'agent-action text-xs text-primary-500 ml-2 font-medium';
+                            } else if (l.status === 'failed') {
+                                actionSpan.textContent = '✗ failed';
+                                actionSpan.className = 'agent-action text-xs text-red-500 ml-2 font-medium';
+                            }
+                        }
+                    }
+                });
+            }
+            if (d.status === 'completed') {
+                setTimeout(function() { window.location.href = resultsUrl; }, 1000);
+            } else if (d.status !== 'failed') {
+                setTimeout(poll, 2000);
+            }
+        };
+        r.send();
+    };
+    setTimeout(poll, 2000);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — CiteVerify{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+            <p class="text-gray-500 mt-1">Welcome back, {{ user.first_name|default:user.username }}</p>
+        </div>
+        <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-500/20 transition-all duration-200">
+            <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Analysis
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Total Analyses</p>
+                    <p class="text-2xl font-bold mt-1">{{ stats.total }}</p>
+                </div>
+                <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Completed</p>
+                    <p class="text-2xl font-bold mt-1">{{ stats.completed }}</p>
+                </div>
+                <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Citations Analyzed</p>
+                    <p class="text-2xl font-bold mt-1">{{ stats.total_citations }}</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Hallucinations Found</p>
+                    <p class="text-2xl font-bold mt-1 {% if stats.hallucinated > 0 %}text-red-600{% endif %}">{{ stats.hallucinated }}</p>
+                </div>
+                <div class="w-10 h-10 {% if stats.hallucinated > 0 %}bg-red-100{% else %}bg-gray-100{% endif %} rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 {% if stats.hallucinated > 0 %}text-red-600{% else %}text-gray-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Analyses -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+            <h2 class="text-lg font-semibold">Recent Analyses</h2>
+        </div>
+        {% if analyses %}
+            <div class="divide-y divide-gray-50">
+                {% for analysis in analyses %}
+                    <div class="px-6 py-4 hover:bg-gray-50 transition-colors card-hover">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4 min-w-0">
+                                <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
+                                    {% if analysis.status == 'completed' %}bg-emerald-100
+                                    {% elif analysis.status == 'failed' %}bg-red-100
+                                    {% elif analysis.status == 'pending' %}bg-gray-100
+                                    {% else %}bg-primary-100{% endif %}">
+                                    {% if analysis.status == 'completed' %}
+                                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {% elif analysis.status == 'failed' %}
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {% elif analysis.status == 'pending' %}
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {% else %}
+                                        <svg class="w-5 h-5 text-primary-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    {% endif %}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-medium text-gray-900 truncate">{{ analysis.title }}</p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ analysis.created_at|date:"M d, Y H:i" }}
+                                        <span class="mx-1">·</span>
+                                        {{ analysis.get_input_type_display }}
+                                        {% if analysis.status == 'completed' and analysis.report %}
+                                            <span class="mx-1">·</span>
+                                            {{ analysis.report.total_citations }} citations
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 flex-shrink-0">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if analysis.status == 'completed' %}bg-emerald-100 text-emerald-700
+                                    {% elif analysis.status == 'failed' %}bg-red-100 text-red-700
+                                    {% elif analysis.status == 'pending' %}bg-gray-100 text-gray-600
+                                    {% else %}bg-primary-100 text-primary-700{% endif %}">
+                                    {{ analysis.get_status_display }}
+                                </span>
+                                {% if analysis.status == 'completed' %}
+                                    <a href="{% url 'detector:analysis_results' analysis.id %}" class="text-sm font-medium text-primary-600 hover:text-primary-700">View Results</a>
+                                {% elif analysis.status == 'failed' %}
+                                    <span class="text-sm text-gray-400">Failed</span>
+                                {% else %}
+                                    <a href="{% url 'detector:analysis_progress' analysis.id %}" class="text-sm font-medium text-primary-600 hover:text-primary-700">View Progress</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if analyses.count > 5 %}
+                <div class="px-6 py-4 border-t border-gray-100 text-center">
+                    <a href="{% url 'detector:history' %}" class="text-sm font-medium text-primary-600 hover:text-primary-700">View all analyses →</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="px-6 py-16 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">No analyses yet</h3>
+                <p class="text-gray-500 mb-6">Start by analyzing a research paper for hallucinated citations.</p>
+                <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-500/20 transition-all duration-200">
+                    <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Start First Analysis
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

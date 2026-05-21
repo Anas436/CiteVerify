@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load detector_extras %}
+{% block title %}Report{% if analysis.title != 'Untitled Analysis' %}: {{ analysis.title }}{% endif %} — CiteVerify{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Citation Analysis Report</h1>
+            <p class="text-gray-500 mt-1">{% if analysis.title != 'Untitled Analysis' %}{{ analysis.title }} · {% endif %}{{ analysis.created_at|date:"F d, Y" }}</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="window.print()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print / PDF
+            </button>
+            <a href="{% url 'detector:analysis_results' analysis.id %}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-xl hover:bg-primary-100 transition-colors">
+                View Citations
+            </a>
+        </div>
+    </div>
+
+    {% if report %}
+    <!-- Credibility Score Hero -->
+    <div class="bg-gradient-to-br from-gray-900 via-primary-900 to-purple-900 rounded-3xl p-8 mb-8 text-white shadow-2xl">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-primary-300 uppercase tracking-wider mb-1">Overall Credibility Score</p>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-6xl font-extrabold">{% widthratio report.overall_credibility_score 1 100 %}</span>
+                    <span class="text-2xl text-primary-300">/ 100</span>
+                </div>
+                <p class="text-primary-200 mt-2 max-w-lg">{{ report.summary|linebreaksbr }}</p>
+            </div>
+            <div class="mt-6 lg:mt-0 flex items-center space-x-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto mb-1">
+                        <span class="text-2xl font-bold text-emerald-400">{{ report.verified_citations }}</span>
+                    </div>
+                    <span class="text-xs text-emerald-300">Verified</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-citrine-500/20 border-2 border-citrine-400 flex items-center justify-center mx-auto mb-1">
+                        <span class="text-2xl font-bold text-citrine-400">{{ report.questionable_citations }}</span>
+                    </div>
+                    <span class="text-xs text-citrine-300">Questionable</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-400 flex items-center justify-center mx-auto mb-1">
+                        <span class="text-2xl font-bold text-red-400">{{ report.hallucinated_citations }}</span>
+                    </div>
+                    <span class="text-xs text-red-300">Hallucinated</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Breakdown -->
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                <svg class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Citation Distribution
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-emerald-600 font-medium">Verified ({{ report.verified_citations }})</span>
+                        <span class="text-gray-500">
+                            {% if report.total_citations > 0 %}{{ report.verified_citations|divisibleby:report.total_citations|floatformat:0 }}{% else %}0{% endif %}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000" style="width: {% widthratio report.verified_citations report.total_citations 100 %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-citrine-600 font-medium">Questionable ({{ report.questionable_citations }})</span>
+                        <span class="text-gray-500">{% widthratio report.questionable_citations report.total_citations 100 %}%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-citrine-500 h-2.5 rounded-full transition-all duration-1000" style="width: {% widthratio report.questionable_citations report.total_citations 100 %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-red-600 font-medium">Hallucinated ({{ report.hallucinated_citations }})</span>
+                        <span class="text-gray-500">{% widthratio report.hallucinated_citations report.total_citations 100 %}%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-red-500 h-2.5 rounded-full transition-all duration-1000" style="width: {% widthratio report.hallucinated_citations report.total_citations 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                <svg class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Key Findings
+            </h2>
+            <ul class="space-y-3">
+                {% for finding in report.recommendations|splitlines %}
+                    <li class="flex items-start space-x-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary-400 mt-2 flex-shrink-0"></span>
+                        <span class="text-sm text-gray-600">{{ finding }}</span>
+                    </li>
+                {% empty %}
+                    <li class="text-sm text-gray-400">No key findings generated.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Questionable Citations List -->
+    {% if report.questionable_citations > 0 %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 bg-citrine-50 border-b border-citrine-100">
+            <h2 class="text-lg font-semibold text-citrine-700 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Questionable Citations ({{ report.questionable_citations }})
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for citation in citations %}
+                {% if citation.severity == 'yellow' %}
+                <div class="px-6 py-4">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-citrine-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ citation.citation_text }}</p>
+                            <p class="text-sm text-citrine-600 mt-1">{{ citation.explanation }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Hallucinated Citations List -->
+    {% if report.hallucinated_citations > 0 %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 bg-red-50 border-b border-red-100">
+            <h2 class="text-lg font-semibold text-red-700 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Hallucinated Citations ({{ report.hallucinated_citations }})
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for citation in citations %}
+                {% if citation.is_hallucinated %}
+                <div class="px-6 py-4">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ citation.citation_text }}</p>
+                            <p class="text-sm text-red-600 mt-1">{{ citation.explanation }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-16">
+        <p class="text-gray-500">Report not available yet.</p>
+    </div>
+    {% endif %}
+
+    <div class="mt-8 flex items-center justify-between">
+        <a href="{% url 'detector:analysis_results' analysis.id %}" class="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+            <span class="flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Back to Results</span>
+        </a>
+    </div>
+</div>
+
+<style>
+@media print {
+    nav, footer { display: none !important; }
+    .card-hover:hover { transform: none !important; }
+    body { background: white; }
+}
+</style>
+{% endblock %}

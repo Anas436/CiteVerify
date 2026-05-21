@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Analysis History — CiteVerify{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Analysis History</h1>
+            <p class="text-gray-500 mt-1">All your past citation analyses</p>
+        </div>
+        <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-500/20 transition-all duration-200">
+            <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Analysis
+        </a>
+    </div>
+
+    {% if analyses %}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Citations</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        {% for analysis in analyses %}
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <p class="font-medium text-gray-900 truncate max-w-xs">{{ analysis.title }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-gray-500">{{ analysis.get_input_type_display }}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if analysis.status == 'completed' %}bg-emerald-100 text-emerald-700
+                                        {% elif analysis.status == 'failed' %}bg-red-100 text-red-700
+                                        {% elif analysis.status == 'pending' %}bg-gray-100 text-gray-600
+                                        {% else %}bg-primary-100 text-primary-700{% endif %}">
+                                        {{ analysis.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    {% if analysis.status == 'completed' and analysis.report %}
+                                        {{ analysis.report.total_citations }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                    {{ analysis.created_at|date:"M d, Y" }}
+                                    <br>
+                                    <span class="text-xs text-gray-400">{{ analysis.created_at|date:"H:i" }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        {% if analysis.status == 'completed' %}
+                                            <a href="{% url 'detector:analysis_results' analysis.id %}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">Results</a>
+                                            <a href="{% url 'detector:report_detail' analysis.id %}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">Report</a>
+                                        {% elif analysis.status == 'failed' or analysis.status == 'pending' %}
+                                            <span class="text-xs text-gray-400">—</span>
+                                        {% else %}
+                                            <a href="{% url 'detector:analysis_progress' analysis.id %}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">Progress</a>
+                                        {% endif %}
+                                        <form method="post" action="{% url 'detector:delete_analysis' analysis.id %}" onsubmit="return confirm('Delete this analysis?')" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm py-16 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">No analyses yet</h3>
+            <p class="text-gray-500 mb-6">Start your first citation analysis.</p>
+            <a href="{% url 'detector:new_analysis' %}" class="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 rounded-xl hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-500/20 transition-all duration-200">
+                <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Start Analysis
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
